@@ -336,6 +336,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FPController
   camera: {fileID: 892986252}
+  animator: {fileID: 914587142}
 --- !u!1 &892986252
 GameObject:
   m_ObjectHideFlags: 0

@@ -20,6 +20,8 @@ public class FPController : MonoBehaviour
     Rigidbody rigidbody;
     CapsuleCollider capsuleCollider;
     public GameObject camera;
+    public Animator animator;
+
 
     Quaternion cameraRotation;
     Quaternion characterRotation;
@@ -36,7 +38,20 @@ public class FPController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (Input.GetKeyUp(KeyCode.T))
+        {
+            animator.SetBool("shouldAim", !animator.GetBool("shouldAim"));
+        }
 
+        if (Input.GetKeyDown(KeyCode.P))
+        {
+            animator.SetBool("shouldFire", true);
+        }
+        else if (Input.GetKeyUp(KeyCode.P))
+        {
+            animator.SetBool("shouldFire", false);
+
+        }
     }
 
     void FixedUpdate()
