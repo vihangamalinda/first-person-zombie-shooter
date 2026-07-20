@@ -4,7 +4,7 @@ public class FPController : MonoBehaviour
 {
     // Start is called once before the first execution of Update after the MonoBehaviour is created
 
-    float speed = 5f;
+    float speed = 0.1f;
 
     void Start()
     {
@@ -22,6 +22,6 @@ public class FPController : MonoBehaviour
         float x = Input.GetAxis("Horizontal");
         float z = Input.GetAxis("Vertical");
 
-        transform.position = new Vector3(x* speed, 0, z* speed);
+        transform.position += new Vector3(x * speed, 0, z * speed);
     }
 }
