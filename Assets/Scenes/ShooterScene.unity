@@ -275,6 +275,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ef3f40b0914bcd544988fb6a3ad05749, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FPController
+  camera: {fileID: 892986252}
 --- !u!1 &892986252
 GameObject:
   m_ObjectHideFlags: 0

@@ -12,6 +12,11 @@ public class FPController : MonoBehaviour
     //float minimumY = -360.0f;
     //float maximumY = 360.0f;
 
+    bool isCursorLocked = true;
+    bool shouldLockCursor = true;
+
+
+
     Rigidbody rigidbody;
     CapsuleCollider capsuleCollider;
     public GameObject camera;
@@ -61,6 +66,8 @@ public class FPController : MonoBehaviour
         float z = Input.GetAxis("Vertical") * speed;
 
         transform.position += camera.transform.forward * z + camera.transform.right * x; //new Vector3(x * speed, 0, z * speed);
+
+        UpdateCursorLock();
     }
 
     bool isGrounded()
@@ -88,5 +95,52 @@ public class FPController : MonoBehaviour
         quaternion.x = Mathf.Tan(0.5f * Mathf.Deg2Rad * angleX);
 
         return quaternion;
+    }
+
+    public void SetCursorLock(bool value)
+    {
+        shouldLockCursor = value;
+
+        if (!shouldLockCursor)
+        {
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
+        }
+    }
+
+    public void UpdateCursorLock()
+    {
+        if (shouldLockCursor)
+        {
+            InternalLockUpdate();
+        }
+    }
+
+    public void InternalLockUpdate()
+    {
+        bool isEscapeReleased = Input.GetKeyUp(KeyCode.Escape);
+        bool isLeftMousePressed = Input.GetMouseButtonUp(0); //left  mouse button index is 0, right mouse button index is 1, middle mouse button index is 2
+
+        if (isEscapeReleased)
+        {
+            isCursorLocked = false;
+        }
+        else if (isLeftMousePressed)
+        {
+            isCursorLocked = true;
+        }
+
+
+
+        if (isCursorLocked)
+        {
+            Cursor.lockState = CursorLockMode.Locked;
+            Cursor.visible = false;
+        }
+        else if (!isCursorLocked)
+        {
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
+        }
     }
 }
