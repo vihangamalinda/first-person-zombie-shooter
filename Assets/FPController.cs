@@ -7,6 +7,11 @@ public class FPController : MonoBehaviour
     float speed = 0.1f;
     float mouseSensitivity = 2.0f;
 
+    float minimumX = -90.0f;
+    float maximumX = 90.0f;
+    //float minimumY = -360.0f;
+    //float maximumY = 360.0f;
+
     Rigidbody rigidbody;
     CapsuleCollider capsuleCollider;
     public GameObject camera;
@@ -38,6 +43,8 @@ public class FPController : MonoBehaviour
         cameraRotation *= Quaternion.Euler(-xRotation, 0, 0);
         characterRotation *= Quaternion.Euler(0, yRotation, 0);
 
+        cameraRotation = ClampRoationAroundXAxis(cameraRotation);
+
         this.transform.localRotation = characterRotation;
         camera.transform.localRotation = cameraRotation;
 
@@ -50,10 +57,10 @@ public class FPController : MonoBehaviour
         }
 
 
-        float x = Input.GetAxis("Horizontal");
-        float z = Input.GetAxis("Vertical");
+        float x = Input.GetAxis("Horizontal") * speed;
+        float z = Input.GetAxis("Vertical") * speed;
 
-        transform.position += new Vector3(x * speed, 0, z * speed);
+        transform.position += camera.transform.forward * z + camera.transform.right * x; //new Vector3(x * speed, 0, z * speed);
     }
 
     bool isGrounded()
@@ -66,5 +73,20 @@ public class FPController : MonoBehaviour
             return true;
         }
         return false;
+    }
+
+    Quaternion ClampRoationAroundXAxis(Quaternion quaternion)
+    {
+        // Convert the quaternion to an angle-axis representation (nomralizing the quaternion first)
+        quaternion.x /= quaternion.w;
+        quaternion.y /= quaternion.w;
+        quaternion.z /= quaternion.w;
+        quaternion.w = 1.0f;
+
+        float angleX = 2.0f * Mathf.Rad2Deg * Mathf.Atan(quaternion.x);
+        angleX = Mathf.Clamp(angleX, minimumX, maximumX);
+        quaternion.x = Mathf.Tan(0.5f * Mathf.Deg2Rad * angleX);
+
+        return quaternion;
     }
 }
