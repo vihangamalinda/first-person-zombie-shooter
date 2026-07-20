@@ -5,13 +5,22 @@ public class FPController : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
 
     float speed = 0.1f;
+    float mouseSensitivity = 2.0f;
+
     Rigidbody rigidbody;
     CapsuleCollider capsuleCollider;
+    public GameObject camera;
+
+    Quaternion cameraRotation;
+    Quaternion characterRotation;
 
     void Start()
     {
         rigidbody = GetComponent<Rigidbody>();
         capsuleCollider = GetComponent<CapsuleCollider>();
+
+        cameraRotation = camera.transform.rotation;
+        characterRotation = this.transform.localRotation;
     }
 
     // Update is called once per frame
@@ -22,6 +31,17 @@ public class FPController : MonoBehaviour
 
     void FixedUpdate()
     {
+
+        float yRotation = Input.GetAxis("Mouse X") * mouseSensitivity;
+        float xRotation = Input.GetAxis("Mouse Y") * mouseSensitivity;
+
+        cameraRotation *= Quaternion.Euler(-xRotation, 0, 0);
+        characterRotation *= Quaternion.Euler(0, yRotation, 0);
+
+        this.transform.localRotation = characterRotation;
+        camera.transform.localRotation = cameraRotation;
+
+
         bool shouldJump = Input.GetKeyDown(KeyCode.Space);
 
         if (shouldJump && isGrounded())
