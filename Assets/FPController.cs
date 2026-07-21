@@ -43,14 +43,14 @@ public class FPController : MonoBehaviour
             animator.SetBool("shouldAim", !animator.GetBool("shouldAim"));
         }
 
-        if (Input.GetKeyDown(KeyCode.P))
+        if (Input.GetMouseButtonDown(0))
         {
-            animator.SetBool("shouldFire", true);
+            animator.SetTrigger("fire");
         }
-        else if (Input.GetKeyUp(KeyCode.P))
-        {
-            animator.SetBool("shouldFire", false);
 
+        if (Input.GetKeyDown(KeyCode.R))
+        {
+            animator.SetTrigger("reload");
         }
     }
 
