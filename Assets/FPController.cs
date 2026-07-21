@@ -38,7 +38,7 @@ public class FPController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetKeyUp(KeyCode.T))
+        if (Input.GetMouseButtonDown(1))
         {
             animator.SetBool("shouldAim", !animator.GetBool("shouldAim"));
         }
@@ -57,7 +57,7 @@ public class FPController : MonoBehaviour
         //bool isWalking = Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.D);
         //animator.SetBool("isWalking", isWalking);
 
-        bool isWalking = Mathf.Abs(Input.GetAxis("Horizontal")) >0 || Mathf.Abs(Input.GetAxis("Vertical")) > 0;
+        bool isWalking = Mathf.Abs(Input.GetAxis("Horizontal")) > 0 || Mathf.Abs(Input.GetAxis("Vertical")) > 0;
         bool isAlreadyWalking = animator.GetBool("isWalking");
 
         if (isWalking)
@@ -68,7 +68,8 @@ public class FPController : MonoBehaviour
             }
 
         }
-        else{
+        else
+        {
             if (isAlreadyWalking)
             {
                 animator.SetBool("isWalking", false);
