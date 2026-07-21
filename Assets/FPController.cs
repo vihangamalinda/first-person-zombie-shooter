@@ -52,6 +52,29 @@ public class FPController : MonoBehaviour
         {
             animator.SetTrigger("reload");
         }
+
+
+        //bool isWalking = Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.D);
+        //animator.SetBool("isWalking", isWalking);
+
+        bool isWalking = Mathf.Abs(Input.GetAxis("Horizontal")) >0 || Mathf.Abs(Input.GetAxis("Vertical")) > 0;
+        bool isAlreadyWalking = animator.GetBool("isWalking");
+
+        if (isWalking)
+        {
+            if (!isAlreadyWalking)
+            {
+                animator.SetBool("isWalking", true);
+            }
+
+        }
+        else{
+            if (isAlreadyWalking)
+            {
+                animator.SetBool("isWalking", false);
+            }
+        }
+
     }
 
     void FixedUpdate()
@@ -75,6 +98,7 @@ public class FPController : MonoBehaviour
         {
             rigidbody.AddForce(0, 300, 0);
         }
+
 
 
         float x = Input.GetAxis("Horizontal") * speed;
