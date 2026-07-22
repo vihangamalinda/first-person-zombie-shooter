@@ -24,6 +24,8 @@ public class FPController : MonoBehaviour
     public Animator animator;
     //public AudioSource shotAudioSource;
 
+    public AudioSource[] walkAudioSourceArr;
+
 
 
     Quaternion cameraRotation;
@@ -70,6 +72,7 @@ public class FPController : MonoBehaviour
             if (!isAlreadyWalking)
             {
                 animator.SetBool("isWalking", true);
+                InvokeRepeating("PlayWalkAudio", 0, 0.4f);
             }
 
         }
@@ -78,9 +81,22 @@ public class FPController : MonoBehaviour
             if (isAlreadyWalking)
             {
                 animator.SetBool("isWalking", false);
+                CancelInvoke("PlayWalkAudio");
             }
         }
 
+    }
+
+    void PlayWalkAudio()
+    {
+        AudioSource audioSource = new AudioSource();
+        int n = Random.Range(1, walkAudioSourceArr.Length);
+
+        audioSource = walkAudioSourceArr[n];
+        audioSource.Play();
+
+        walkAudioSourceArr[n] = walkAudioSourceArr[0];
+        walkAudioSourceArr[0] = audioSource;
     }
 
     void FixedUpdate()
