@@ -17,10 +17,13 @@ public class FPController : MonoBehaviour
 
 
 
+
     Rigidbody rigidbody;
     CapsuleCollider capsuleCollider;
     public GameObject camera;
     public Animator animator;
+    //public AudioSource shotAudioSource;
+
 
 
     Quaternion cameraRotation;
@@ -45,7 +48,9 @@ public class FPController : MonoBehaviour
 
         if (Input.GetMouseButtonDown(0))
         {
+
             animator.SetTrigger("fire");
+            //shotAudioSource.Play();
         }
 
         if (Input.GetKeyDown(KeyCode.R))
