@@ -25,6 +25,8 @@ public class FPController : MonoBehaviour
     //public AudioSource shotAudioSource;
 
     public AudioSource[] walkAudioSourceArr;
+    public AudioSource jumpAudioSource;
+    public AudioSource landAudioSource;
 
 
 
@@ -85,6 +87,19 @@ public class FPController : MonoBehaviour
             }
         }
 
+
+        bool shouldJump = Input.GetKeyDown(KeyCode.Space);
+
+        if (shouldJump && isGrounded())
+        {
+            rigidbody.AddForce(0, 300, 0);
+            jumpAudioSource.Play();
+            if (animator.GetBool("isWalking"))
+            {
+                CancelInvoke("PlayWalkAudio");
+            }
+        }
+
     }
 
     void PlayWalkAudio()
@@ -114,12 +129,7 @@ public class FPController : MonoBehaviour
         camera.transform.localRotation = cameraRotation;
 
 
-        bool shouldJump = Input.GetKeyDown(KeyCode.Space);
 
-        if (shouldJump && isGrounded())
-        {
-            rigidbody.AddForce(0, 300, 0);
-        }
 
 
 
@@ -141,6 +151,19 @@ public class FPController : MonoBehaviour
             return true;
         }
         return false;
+    }
+
+    void OnCollisionEnter(Collision collision)
+    {
+        bool hasCollidedWithPlane = collision.gameObject.name == "Plane";
+        if (hasCollidedWithPlane)
+        {
+            landAudioSource.Play();
+            if (animator.GetBool("isWalking"))
+            {
+                InvokeRepeating("PlayWalkAudio", 0, 0.4f);
+            }
+        }
     }
 
     Quaternion ClampRoationAroundXAxis(Quaternion quaternion)
