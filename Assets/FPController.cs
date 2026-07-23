@@ -27,8 +27,8 @@ public class FPController : MonoBehaviour
     public AudioSource[] walkAudioSourceArr;
     public AudioSource jumpAudioSource;
     public AudioSource landAudioSource;
-
-
+    public AudioSource ammoPickUpAudioSource;
+    public AudioSource medikitPickUpAudioSource;
 
     Quaternion cameraRotation;
     Quaternion characterRotation;
@@ -129,10 +129,6 @@ public class FPController : MonoBehaviour
         camera.transform.localRotation = cameraRotation;
 
 
-
-
-
-
         float x = Input.GetAxis("Horizontal") * speed;
         float z = Input.GetAxis("Vertical") * speed;
 
@@ -155,6 +151,8 @@ public class FPController : MonoBehaviour
 
     void OnCollisionEnter(Collision collision)
     {
+        CollidedWithCollectables(collision);
+
         bool hasCollidedWithPlane = collision.gameObject.name == "Plane";
         if (hasCollidedWithPlane)
         {
@@ -163,6 +161,27 @@ public class FPController : MonoBehaviour
             {
                 InvokeRepeating("PlayWalkAudio", 0, 0.4f);
             }
+        }
+    }
+
+    private void CollidedWithCollectables(Collision collision)
+    {
+        bool collidedWithAmmoBox = collision.gameObject.tag == "Ammo";
+
+        if (collidedWithAmmoBox)
+        {
+            ammoPickUpAudioSource.Play();
+            Debug.Log("Collided with Ammo Box");
+            Destroy(collision.gameObject);
+        }
+
+        bool collidedWithMediKit = collision.gameObject.tag == "Medikit";
+
+        if (collidedWithMediKit)
+        {
+            medikitPickUpAudioSource.Play();
+            Debug.Log("Collided with MediKit");
+            Destroy(collision.gameObject);
         }
     }
 
