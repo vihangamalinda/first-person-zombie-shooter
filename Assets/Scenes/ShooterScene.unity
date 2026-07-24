@@ -1014,7 +1014,7 @@ GameObject:
   - component: {fileID: 631072503}
   - component: {fileID: 631072502}
   m_Layer: 0
-  m_Name: Cube
+  m_Name: Larva
   m_TagString: larva
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2274,7 +2274,7 @@ AudioSource:
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: 0}
   m_audioClip: {fileID: 0}
-  m_Resource: {fileID: 8300000, guid: f73ec93c94b0d0e4eb4fe3883bcd91ea, type: 3}
+  m_Resource: {fileID: 8300000, guid: c98d51439e13a15469edcf1b1a74b47e, type: 3}
   m_PlayOnAwake: 0
   m_Volume: 1
   m_Pitch: 1
