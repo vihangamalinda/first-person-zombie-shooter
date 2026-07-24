@@ -38,14 +38,14 @@ public class FPController : MonoBehaviour
 
     // Inventory system variables
     int ammoCount = 0;
-    int maxAmmoCount = 20;
     int loadedAmmoCount = 0;
-    int maxLoadedAmmoCount = 6;
+    readonly int maxAmmoCount = 20;
+    readonly int maxLoadedAmmoCount = 6;
 
     int characterHealth = 100;
     int medikitCount = 0;
-    int healthPerMedikit = 15;
-    int maxMedikitCount = 4;
+    readonly int healthPerMedikit = 15;
+    readonly int maxMedikitCount = 4;
 
 
     void Start()
