@@ -70,45 +70,22 @@ public class FPController : MonoBehaviour
 
         if (shouldFire)
         {
-            if (this.loadedAmmoCount > 0)
-            {
-                animator.SetTrigger("fire");
-                this.loadedAmmoCount--;
-
-                //shotAudioSource.Play();
-            }
-            else if (animator.GetBool("shouldAim"))
-            {
-                //Dry fire sound or play empty magazine animation
-                Debug.Log("Dry fire - no ammo left in the magazine");
-                dryFireAudioSource.Play();
-            }
+            this.PerformGunFiring();
 
         }
 
         bool shouldUseMedikit = Input.GetKeyDown(KeyCode.H) && this.medikitCount > 0 && this.characterHealth < 100;
         if (shouldUseMedikit)
         {
-            this.characterHealth = Mathf.Clamp(this.characterHealth + this.healthPerMedikit, 0, 100);
-            this.medikitCount--;
-            Debug.Log("Used medikit. Current health: " + this.characterHealth + ", remaining medikits: " + this.medikitCount);
+            this.ApplyMedikit();
         }
 
 
         bool shouldReload = Input.GetKeyDown(KeyCode.R) && this.loadedAmmoCount < this.maxLoadedAmmoCount && this.ammoCount > 0;
-        Debug.Log("Should reload: " + shouldReload);
+        //Debug.Log("Should reload: " + shouldReload);
         if (shouldReload)
         {
-            Debug.Log("Before reload - loaded ammo: " + this.loadedAmmoCount);
-            Debug.Log("Before reload - current ammo count: " + this.ammoCount);
-
-            animator.SetTrigger("reload");
-            int ammoToReload = Mathf.Min(this.maxLoadedAmmoCount - this.loadedAmmoCount, this.ammoCount);
-
-            this.loadedAmmoCount = Mathf.Clamp(this.loadedAmmoCount + ammoToReload, 0, this.maxLoadedAmmoCount);
-            this.ammoCount -= ammoToReload;
-            Debug.Log("After reload - loaded ammo: " + this.loadedAmmoCount);
-            Debug.Log("After reload - current ammo count: " + this.ammoCount);
+            this.PerformAmmoRelod();
         }
 
 
@@ -141,15 +118,11 @@ public class FPController : MonoBehaviour
 
         if (shouldJump && isGrounded())
         {
-            rigidbody.AddForce(0, 300, 0);
-            jumpAudioSource.Play();
-            if (animator.GetBool("isWalking"))
-            {
-                CancelInvoke("PlayWalkAudio");
-            }
+            this.PerformJump();
         }
 
     }
+
 
     void PlayWalkAudio()
     {
@@ -328,4 +301,55 @@ public class FPController : MonoBehaviour
             Cursor.visible = true;
         }
     }
+
+
+
+    private void PerformJump()
+    {
+        rigidbody.AddForce(0, 300, 0);
+        jumpAudioSource.Play();
+        if (animator.GetBool("isWalking"))
+        {
+            CancelInvoke("PlayWalkAudio");
+        }
+    }
+    private void PerformAmmoRelod()
+    {
+        Debug.Log("Before reload - loaded ammo: " + this.loadedAmmoCount);
+        Debug.Log("Before reload - current ammo count: " + this.ammoCount);
+
+        animator.SetTrigger("reload");
+        int ammoToReload = Mathf.Min(this.maxLoadedAmmoCount - this.loadedAmmoCount, this.ammoCount);
+
+        this.loadedAmmoCount = Mathf.Clamp(this.loadedAmmoCount + ammoToReload, 0, this.maxLoadedAmmoCount);
+        this.ammoCount -= ammoToReload;
+        Debug.Log("After reload - loaded ammo: " + this.loadedAmmoCount);
+        Debug.Log("After reload - current ammo count: " + this.ammoCount);
+
+    }
+
+    private void ApplyMedikit()
+    {
+        this.characterHealth = Mathf.Clamp(this.characterHealth + this.healthPerMedikit, 0, 100);
+        this.medikitCount--;
+        Debug.Log("Used medikit. Current health: " + this.characterHealth + ", remaining medikits: " + this.medikitCount);
+    }
+
+    private void PerformGunFiring()
+    {
+        if (this.loadedAmmoCount > 0)
+        {
+            animator.SetTrigger("fire");
+            this.loadedAmmoCount--;
+
+            //shotAudioSource.Play();
+        }
+        else if (animator.GetBool("shouldAim"))
+        {
+            //Dry fire sound or play empty magazine animation
+            Debug.Log("Dry fire - no ammo left in the magazine");
+            dryFireAudioSource.Play();
+        }
+    }
+
 }
