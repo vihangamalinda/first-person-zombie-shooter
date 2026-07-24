@@ -30,6 +30,7 @@ public class FPController : MonoBehaviour
     public AudioSource ammoPickUpAudioSource;
     public AudioSource medikitPickUpAudioSource;
     public AudioSource dryFireAudioSource;
+    public AudioSource painfulAudioSource;
 
     Quaternion cameraRotation;
     Quaternion characterRotation;
@@ -41,7 +42,9 @@ public class FPController : MonoBehaviour
     int loadedAmmoCount = 0;
     int maxLoadedAmmoCount = 6;
 
+    int characterHealth = 100;
     int medikitCount = 0;
+    int healthPerMedikit = 15;
     int maxMedikitCount = 4;
 
 
@@ -81,6 +84,14 @@ public class FPController : MonoBehaviour
                 dryFireAudioSource.Play();
             }
 
+        }
+
+        bool shouldUseMedikit = Input.GetKeyDown(KeyCode.H) && this.medikitCount > 0 && this.characterHealth < 100;
+        if (shouldUseMedikit)
+        {
+            this.characterHealth = Mathf.Clamp(this.characterHealth + this.healthPerMedikit, 0, 100);
+            this.medikitCount--;
+            Debug.Log("Used medikit. Current health: " + this.characterHealth + ", remaining medikits: " + this.medikitCount);
         }
 
 
@@ -191,6 +202,8 @@ public class FPController : MonoBehaviour
     {
         CollidedWithCollectables(collision);
 
+        CollidedWithHarmFullFloor(collision);
+
         bool hasCollidedWithPlane = collision.gameObject.name == "Plane";
         if (hasCollidedWithPlane)
         {
@@ -202,6 +215,29 @@ public class FPController : MonoBehaviour
         }
     }
 
+    private void CollidedWithHarmFullFloor(Collision collision)
+    {
+        Debug.Log("Character Health: " + this.characterHealth);
+
+        bool hasCollidedWithLarva = collision.gameObject.CompareTag("larva");
+        if (hasCollidedWithLarva)
+        {
+            if (this.characterHealth > 10)
+            {
+                this.characterHealth = Mathf.Clamp(this.characterHealth - 10, 0, 100);
+
+                bool isCharacterDead = this.characterHealth == 0;
+                if (isCharacterDead)
+                {
+                    Debug.Log("Character has died");
+                }
+
+            }
+
+
+            painfulAudioSource.Play();
+        }
+    }
     private void CollidedWithCollectables(Collision collision)
     {
         bool collidedWithAmmoBox = collision.gameObject.tag == "Ammo";
