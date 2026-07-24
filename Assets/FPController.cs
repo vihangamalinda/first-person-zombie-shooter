@@ -54,6 +54,8 @@ public class FPController : MonoBehaviour
     private static readonly int isWalkingHash = Animator.StringToHash("isWalking");
     private static readonly int reloadHash = Animator.StringToHash("reload");
 
+    bool playingWalkAudio = false;
+    bool previouslyGrounded = true;
 
     void Start()
     {
@@ -117,17 +119,23 @@ public class FPController : MonoBehaviour
             {
                 animator.SetBool(isWalkingHash, false);
                 CancelInvoke("PlayWalkAudio");
+                this.playingWalkAudio = false;
             }
         }
 
-
+        bool grounded = this.isGrounded();
         bool shouldJump = Input.GetKeyDown(KeyCode.Space);
 
-        if (shouldJump && isGrounded())
+        if (shouldJump && grounded)
         {
             this.PerformJump();
         }
+        else if (!previouslyGrounded && grounded)
+        {
+            landAudioSource.Play();
+        }
 
+        previouslyGrounded = grounded;
     }
 
 
@@ -138,6 +146,7 @@ public class FPController : MonoBehaviour
 
         audioSource = walkAudioSourceArr[n];
         audioSource.Play();
+        this.playingWalkAudio = true;
 
         walkAudioSourceArr[n] = walkAudioSourceArr[0];
         walkAudioSourceArr[0] = audioSource;
@@ -187,8 +196,8 @@ public class FPController : MonoBehaviour
         bool hasCollidedWithPlane = collision.gameObject.name == "Plane";
         if (hasCollidedWithPlane)
         {
-            landAudioSource.Play();
-            if (animator.GetBool("isWalking"))
+            //landAudioSource.Play();
+            if (animator.GetBool(isWalkingHash) && !this.playingWalkAudio)
             {
                 InvokeRepeating("PlayWalkAudio", 0, 0.4f);
             }
@@ -318,6 +327,7 @@ public class FPController : MonoBehaviour
         if (animator.GetBool(isWalkingHash))
         {
             CancelInvoke("PlayWalkAudio");
+            playingWalkAudio = false;
         }
     }
     private void PerformAmmoRelod()
