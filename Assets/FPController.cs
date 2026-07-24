@@ -29,6 +29,7 @@ public class FPController : MonoBehaviour
     public AudioSource landAudioSource;
     public AudioSource ammoPickUpAudioSource;
     public AudioSource medikitPickUpAudioSource;
+    public AudioSource dryFireAudioSource;
 
     Quaternion cameraRotation;
     Quaternion characterRotation;
@@ -37,7 +38,7 @@ public class FPController : MonoBehaviour
     // Inventory system variables
     int ammoCount = 0;
     int maxAmmoCount = 20;
-    int loadedAmmoCount = 6;
+    int loadedAmmoCount = 0;
     int maxLoadedAmmoCount = 6;
 
     int medikitCount = 0;
@@ -73,9 +74,11 @@ public class FPController : MonoBehaviour
 
                 //shotAudioSource.Play();
             }
-            else if (animator.GetBool("arm"))
+            else if (animator.GetBool("shouldAim"))
             {
                 //Dry fire sound or play empty magazine animation
+                Debug.Log("Dry fire - no ammo left in the magazine");
+                dryFireAudioSource.Play();
             }
 
         }
