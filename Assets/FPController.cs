@@ -33,6 +33,14 @@ public class FPController : MonoBehaviour
     Quaternion cameraRotation;
     Quaternion characterRotation;
 
+
+    // Inventory system variables
+    int ammoCount = 0;
+    int maxAmmoCount = 20;
+    int medikitCount = 0;
+    int maxMedikitCount = 4;
+
+
     void Start()
     {
         rigidbody = GetComponent<Rigidbody>();
@@ -167,21 +175,29 @@ public class FPController : MonoBehaviour
     private void CollidedWithCollectables(Collision collision)
     {
         bool collidedWithAmmoBox = collision.gameObject.tag == "Ammo";
+        bool canCollectAmmo = collidedWithAmmoBox && this.ammoCount < this.maxAmmoCount;
 
-        if (collidedWithAmmoBox)
+        if (canCollectAmmo)
         {
             ammoPickUpAudioSource.Play();
             Debug.Log("Collided with Ammo Box");
+            this.ammoCount = Mathf.Clamp(this.ammoCount + 6, 0, this.maxAmmoCount);
             Destroy(collision.gameObject);
+
+            Debug.Log("Ammo Count: " + this.ammoCount);
         }
 
         bool collidedWithMediKit = collision.gameObject.tag == "Medikit";
+        bool canCollectMediKit = collidedWithMediKit && this.medikitCount < this.maxMedikitCount;
 
-        if (collidedWithMediKit)
+        if (canCollectMediKit)
         {
             medikitPickUpAudioSource.Play();
             Debug.Log("Collided with MediKit");
+            this.medikitCount = Mathf.Clamp(this.medikitCount + 1, 0, this.maxMedikitCount);
             Destroy(collision.gameObject);
+
+            Debug.Log("Medikit Count: " + this.medikitCount);
         }
     }
 
