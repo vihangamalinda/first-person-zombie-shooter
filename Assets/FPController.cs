@@ -47,6 +47,11 @@ public class FPController : MonoBehaviour
     readonly int healthPerMedikit = 15;
     readonly int maxMedikitCount = 4;
 
+    private static readonly int shouldAimHash = Animator.StringToHash("shouldAim");
+    private static readonly int fireHash = Animator.StringToHash("fire");
+    private static readonly int isWalkingHash = Animator.StringToHash("isWalking");
+    private static readonly int reloadHash = Animator.StringToHash("reload");
+
 
     void Start()
     {
@@ -63,10 +68,10 @@ public class FPController : MonoBehaviour
 
         if (Input.GetMouseButtonDown(1))
         {
-            animator.SetBool("shouldAim", !animator.GetBool("shouldAim"));
+            animator.SetBool(shouldAimHash, !animator.GetBool(shouldAimHash));
         }
 
-        bool shouldFire = Input.GetMouseButtonDown(0) && !animator.GetBool("fire");
+        bool shouldFire = Input.GetMouseButtonDown(0) && !animator.GetBool(fireHash);
 
         if (shouldFire)
         {
@@ -93,13 +98,13 @@ public class FPController : MonoBehaviour
         //animator.SetBool("isWalking", isWalking);
 
         bool isWalking = Mathf.Abs(Input.GetAxis("Horizontal")) > 0 || Mathf.Abs(Input.GetAxis("Vertical")) > 0;
-        bool isAlreadyWalking = animator.GetBool("isWalking");
+        bool isAlreadyWalking = animator.GetBool(isWalkingHash);
 
         if (isWalking)
         {
             if (!isAlreadyWalking)
             {
-                animator.SetBool("isWalking", true);
+                animator.SetBool(isWalkingHash, true);
                 InvokeRepeating("PlayWalkAudio", 0, 0.4f);
             }
 
@@ -108,7 +113,7 @@ public class FPController : MonoBehaviour
         {
             if (isAlreadyWalking)
             {
-                animator.SetBool("isWalking", false);
+                animator.SetBool(isWalkingHash, false);
                 CancelInvoke("PlayWalkAudio");
             }
         }
@@ -308,7 +313,7 @@ public class FPController : MonoBehaviour
     {
         rigidbody.AddForce(0, 300, 0);
         jumpAudioSource.Play();
-        if (animator.GetBool("isWalking"))
+        if (animator.GetBool(isWalkingHash))
         {
             CancelInvoke("PlayWalkAudio");
         }
@@ -318,7 +323,7 @@ public class FPController : MonoBehaviour
         Debug.Log("Before reload - loaded ammo: " + this.loadedAmmoCount);
         Debug.Log("Before reload - current ammo count: " + this.ammoCount);
 
-        animator.SetTrigger("reload");
+        animator.SetTrigger(reloadHash);
         int ammoToReload = Mathf.Min(this.maxLoadedAmmoCount - this.loadedAmmoCount, this.ammoCount);
 
         this.loadedAmmoCount = Mathf.Clamp(this.loadedAmmoCount + ammoToReload, 0, this.maxLoadedAmmoCount);
@@ -339,12 +344,12 @@ public class FPController : MonoBehaviour
     {
         if (this.loadedAmmoCount > 0)
         {
-            animator.SetTrigger("fire");
+            animator.SetTrigger(fireHash);
             this.loadedAmmoCount--;
 
             //shotAudioSource.Play();
         }
-        else if (animator.GetBool("shouldAim"))
+        else if (animator.GetBool(shouldAimHash))
         {
             //Dry fire sound or play empty magazine animation
             Debug.Log("Dry fire - no ammo left in the magazine");
