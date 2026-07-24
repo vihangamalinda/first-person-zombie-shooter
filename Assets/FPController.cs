@@ -31,6 +31,8 @@ public class FPController : MonoBehaviour
     public AudioSource medikitPickUpAudioSource;
     public AudioSource dryFireAudioSource;
     public AudioSource painfulAudioSource;
+    public AudioSource gunRelodAudioSource;
+
 
     Quaternion cameraRotation;
     Quaternion characterRotation;
@@ -324,6 +326,7 @@ public class FPController : MonoBehaviour
         Debug.Log("Before reload - current ammo count: " + this.ammoCount);
 
         animator.SetTrigger(reloadHash);
+        gunRelodAudioSource.Play();
         int ammoToReload = Mathf.Min(this.maxLoadedAmmoCount - this.loadedAmmoCount, this.ammoCount);
 
         this.loadedAmmoCount = Mathf.Clamp(this.loadedAmmoCount + ammoToReload, 0, this.maxLoadedAmmoCount);
