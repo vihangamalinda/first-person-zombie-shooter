@@ -37,6 +37,9 @@ public class FPController : MonoBehaviour
     // Inventory system variables
     int ammoCount = 0;
     int maxAmmoCount = 20;
+    int loadedAmmoCount = 6;
+    int maxLoadedAmmoCount = 6;
+
     int medikitCount = 0;
     int maxMedikitCount = 4;
 
@@ -53,21 +56,45 @@ public class FPController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+
         if (Input.GetMouseButtonDown(1))
         {
             animator.SetBool("shouldAim", !animator.GetBool("shouldAim"));
         }
 
-        if (Input.GetMouseButtonDown(0))
-        {
+        bool shouldFire = Input.GetMouseButtonDown(0) && !animator.GetBool("fire");
 
-            animator.SetTrigger("fire");
-            //shotAudioSource.Play();
+        if (shouldFire)
+        {
+            if (this.loadedAmmoCount > 0)
+            {
+                animator.SetTrigger("fire");
+                this.loadedAmmoCount--;
+
+                //shotAudioSource.Play();
+            }
+            else if (animator.GetBool("arm"))
+            {
+                //Dry fire sound or play empty magazine animation
+            }
+
         }
 
-        if (Input.GetKeyDown(KeyCode.R))
+
+        bool shouldReload = Input.GetKeyDown(KeyCode.R) && this.loadedAmmoCount < this.maxLoadedAmmoCount && this.ammoCount > 0;
+        Debug.Log("Should reload: " + shouldReload);
+        if (shouldReload)
         {
+            Debug.Log("Before reload - loaded ammo: " + this.loadedAmmoCount);
+            Debug.Log("Before reload - current ammo count: " + this.ammoCount);
+
             animator.SetTrigger("reload");
+            int ammoToReload = Mathf.Min(this.maxLoadedAmmoCount - this.loadedAmmoCount, this.ammoCount);
+
+            this.loadedAmmoCount = Mathf.Clamp(this.loadedAmmoCount + ammoToReload, 0, this.maxLoadedAmmoCount);
+            this.ammoCount -= ammoToReload;
+            Debug.Log("After reload - loaded ammo: " + this.loadedAmmoCount);
+            Debug.Log("After reload - current ammo count: " + this.ammoCount);
         }
 
 
