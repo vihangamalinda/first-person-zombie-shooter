@@ -27,11 +27,35 @@ public class FPController : MonoBehaviour
     public AudioSource[] walkAudioSourceArr;
     public AudioSource jumpAudioSource;
     public AudioSource landAudioSource;
-
+    public AudioSource ammoPickUpAudioSource;
+    public AudioSource medikitPickUpAudioSource;
+    public AudioSource dryFireAudioSource;
+    public AudioSource painfulAudioSource;
+    public AudioSource gunRelodAudioSource;
 
 
     Quaternion cameraRotation;
     Quaternion characterRotation;
+
+
+    // Inventory system variables
+    int ammoCount = 0;
+    int loadedAmmoCount = 0;
+    readonly int maxAmmoCount = 20;
+    readonly int maxLoadedAmmoCount = 6;
+
+    int characterHealth = 100;
+    int medikitCount = 0;
+    readonly int healthPerMedikit = 15;
+    readonly int maxMedikitCount = 4;
+
+    private static readonly int shouldAimHash = Animator.StringToHash("shouldAim");
+    private static readonly int fireHash = Animator.StringToHash("fire");
+    private static readonly int isWalkingHash = Animator.StringToHash("isWalking");
+    private static readonly int reloadHash = Animator.StringToHash("reload");
+
+    bool playingWalkAudio = false;
+    bool previouslyGrounded = true;
 
     void Start()
     {
@@ -45,21 +69,32 @@ public class FPController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+
         if (Input.GetMouseButtonDown(1))
         {
-            animator.SetBool("shouldAim", !animator.GetBool("shouldAim"));
+            animator.SetBool(shouldAimHash, !animator.GetBool(shouldAimHash));
         }
 
-        if (Input.GetMouseButtonDown(0))
-        {
+        bool shouldFire = Input.GetMouseButtonDown(0) && !animator.GetBool(fireHash);
 
-            animator.SetTrigger("fire");
-            //shotAudioSource.Play();
+        if (shouldFire)
+        {
+            this.PerformGunFiring();
+
         }
 
-        if (Input.GetKeyDown(KeyCode.R))
+        bool shouldUseMedikit = Input.GetKeyDown(KeyCode.H) && this.medikitCount > 0 && this.characterHealth < 100;
+        if (shouldUseMedikit)
         {
-            animator.SetTrigger("reload");
+            this.ApplyMedikit();
+        }
+
+
+        bool shouldReload = Input.GetKeyDown(KeyCode.R) && this.loadedAmmoCount < this.maxLoadedAmmoCount && this.ammoCount > 0;
+        //Debug.Log("Should reload: " + shouldReload);
+        if (shouldReload)
+        {
+            this.PerformAmmoRelod();
         }
 
 
@@ -67,13 +102,13 @@ public class FPController : MonoBehaviour
         //animator.SetBool("isWalking", isWalking);
 
         bool isWalking = Mathf.Abs(Input.GetAxis("Horizontal")) > 0 || Mathf.Abs(Input.GetAxis("Vertical")) > 0;
-        bool isAlreadyWalking = animator.GetBool("isWalking");
+        bool isAlreadyWalking = animator.GetBool(isWalkingHash);
 
         if (isWalking)
         {
             if (!isAlreadyWalking)
             {
-                animator.SetBool("isWalking", true);
+                animator.SetBool(isWalkingHash, true);
                 InvokeRepeating("PlayWalkAudio", 0, 0.4f);
             }
 
@@ -82,25 +117,27 @@ public class FPController : MonoBehaviour
         {
             if (isAlreadyWalking)
             {
-                animator.SetBool("isWalking", false);
+                animator.SetBool(isWalkingHash, false);
                 CancelInvoke("PlayWalkAudio");
+                this.playingWalkAudio = false;
             }
         }
 
-
+        bool grounded = this.isGrounded();
         bool shouldJump = Input.GetKeyDown(KeyCode.Space);
 
-        if (shouldJump && isGrounded())
+        if (shouldJump && grounded)
         {
-            rigidbody.AddForce(0, 300, 0);
-            jumpAudioSource.Play();
-            if (animator.GetBool("isWalking"))
-            {
-                CancelInvoke("PlayWalkAudio");
-            }
+            this.PerformJump();
+        }
+        else if (!previouslyGrounded && grounded)
+        {
+            landAudioSource.Play();
         }
 
+        previouslyGrounded = grounded;
     }
+
 
     void PlayWalkAudio()
     {
@@ -109,6 +146,7 @@ public class FPController : MonoBehaviour
 
         audioSource = walkAudioSourceArr[n];
         audioSource.Play();
+        this.playingWalkAudio = true;
 
         walkAudioSourceArr[n] = walkAudioSourceArr[0];
         walkAudioSourceArr[0] = audioSource;
@@ -127,10 +165,6 @@ public class FPController : MonoBehaviour
 
         this.transform.localRotation = characterRotation;
         camera.transform.localRotation = cameraRotation;
-
-
-
-
 
 
         float x = Input.GetAxis("Horizontal") * speed;
@@ -155,14 +189,70 @@ public class FPController : MonoBehaviour
 
     void OnCollisionEnter(Collision collision)
     {
+        CollidedWithCollectables(collision);
+
+        CollidedWithHarmFullFloor(collision);
+
         bool hasCollidedWithPlane = collision.gameObject.name == "Plane";
         if (hasCollidedWithPlane)
         {
-            landAudioSource.Play();
-            if (animator.GetBool("isWalking"))
+            //landAudioSource.Play();
+            if (animator.GetBool(isWalkingHash) && !this.playingWalkAudio)
             {
                 InvokeRepeating("PlayWalkAudio", 0, 0.4f);
             }
+        }
+    }
+
+    private void CollidedWithHarmFullFloor(Collision collision)
+    {
+        Debug.Log("Character Health: " + this.characterHealth);
+
+        bool hasCollidedWithLarva = collision.gameObject.CompareTag("larva");
+        if (hasCollidedWithLarva)
+        {
+            if (this.characterHealth > 10)
+            {
+                this.characterHealth = Mathf.Clamp(this.characterHealth - 10, 0, 100);
+
+                bool isCharacterDead = this.characterHealth == 0;
+                if (isCharacterDead)
+                {
+                    Debug.Log("Character has died");
+                }
+
+            }
+
+
+            painfulAudioSource.Play();
+        }
+    }
+    private void CollidedWithCollectables(Collision collision)
+    {
+        bool collidedWithAmmoBox = collision.gameObject.tag == "Ammo";
+        bool canCollectAmmo = collidedWithAmmoBox && this.ammoCount < this.maxAmmoCount;
+
+        if (canCollectAmmo)
+        {
+            ammoPickUpAudioSource.Play();
+            Debug.Log("Collided with Ammo Box");
+            this.ammoCount = Mathf.Clamp(this.ammoCount + 6, 0, this.maxAmmoCount);
+            Destroy(collision.gameObject);
+
+            Debug.Log("Ammo Count: " + this.ammoCount);
+        }
+
+        bool collidedWithMediKit = collision.gameObject.tag == "Medikit";
+        bool canCollectMediKit = collidedWithMediKit && this.medikitCount < this.maxMedikitCount;
+
+        if (canCollectMediKit)
+        {
+            medikitPickUpAudioSource.Play();
+            Debug.Log("Collided with MediKit");
+            this.medikitCount = Mathf.Clamp(this.medikitCount + 1, 0, this.maxMedikitCount);
+            Destroy(collision.gameObject);
+
+            Debug.Log("Medikit Count: " + this.medikitCount);
         }
     }
 
@@ -227,4 +317,57 @@ public class FPController : MonoBehaviour
             Cursor.visible = true;
         }
     }
+
+
+
+    private void PerformJump()
+    {
+        rigidbody.AddForce(0, 300, 0);
+        jumpAudioSource.Play();
+        if (animator.GetBool(isWalkingHash))
+        {
+            CancelInvoke("PlayWalkAudio");
+            playingWalkAudio = false;
+        }
+    }
+    private void PerformAmmoRelod()
+    {
+        Debug.Log("Before reload - loaded ammo: " + this.loadedAmmoCount);
+        Debug.Log("Before reload - current ammo count: " + this.ammoCount);
+
+        animator.SetTrigger(reloadHash);
+        gunRelodAudioSource.Play();
+        int ammoToReload = Mathf.Min(this.maxLoadedAmmoCount - this.loadedAmmoCount, this.ammoCount);
+
+        this.loadedAmmoCount = Mathf.Clamp(this.loadedAmmoCount + ammoToReload, 0, this.maxLoadedAmmoCount);
+        this.ammoCount -= ammoToReload;
+        Debug.Log("After reload - loaded ammo: " + this.loadedAmmoCount);
+        Debug.Log("After reload - current ammo count: " + this.ammoCount);
+
+    }
+
+    private void ApplyMedikit()
+    {
+        this.characterHealth = Mathf.Clamp(this.characterHealth + this.healthPerMedikit, 0, 100);
+        this.medikitCount--;
+        Debug.Log("Used medikit. Current health: " + this.characterHealth + ", remaining medikits: " + this.medikitCount);
+    }
+
+    private void PerformGunFiring()
+    {
+        if (this.loadedAmmoCount > 0)
+        {
+            animator.SetTrigger(fireHash);
+            this.loadedAmmoCount--;
+
+            //shotAudioSource.Play();
+        }
+        else if (animator.GetBool(shouldAimHash))
+        {
+            //Dry fire sound or play empty magazine animation
+            Debug.Log("Dry fire - no ammo left in the magazine");
+            dryFireAudioSource.Play();
+        }
+    }
+
 }
